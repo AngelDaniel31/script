@@ -8,11 +8,16 @@
       background: black;
       text-align: center;
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
     canvas {
       background: #111;
       margin-top: 20px;
       border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      height: auto;
     }
     button {
       padding: 10px 20px;
@@ -23,32 +28,45 @@
       border-radius: 8px;
       box-shadow: 0 0 10px #ff0066;
       cursor: pointer;
+      margin: 10px;
+    }
+    h1 {
+      color: white;
+      font-size: 1.8em;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-   <a href="Otro.html">
-  <button>IR A CORAZON 2</button>
-</a>
+  <a href="Otro.html">
+    <button>IR A CORAZÓN 2</button>
+  </a>
 
-
-  <h1 style="color:white;">Corazón para FATI 💖</h1>
+  <h1>Corazón para FATI 💖</h1>
   <button onclick="dibujarCorazon()">Dibujar Corazón</button>
- 
+
   <br><br>
-  <canvas id="lienzo" width="400" height="400"></canvas>
+  <canvas id="lienzo"></canvas>
 
   <script>
     const canvas = document.getElementById("lienzo");
     const ctx = canvas.getContext("2d");
 
-    // Centrado en el canvas y ajustado para rozar bordes sin salirse
-    function heartEquation(t, scale = 150) {
-      const x = 200 + scale * Math.pow(Math.sin(t), 3);
-      const y = 220 - scale * (
-        0.8125 * Math.cos(t) - 
-        0.3125 * Math.cos(2 * t) - 
-        0.125 * Math.cos(3 * t) - 
+    function ajustarCanvas() {
+      const width = Math.min(window.innerWidth * 0.9, 400);
+      canvas.width = width;
+      canvas.height = width;
+    }
+
+    window.addEventListener('resize', ajustarCanvas);
+    ajustarCanvas(); // Inicial
+
+    function heartEquation(t, scale) {
+      const x = canvas.width / 2 + scale * Math.pow(Math.sin(t), 3);
+      const y = canvas.height / 2.1 - scale * (
+        0.8125 * Math.cos(t) -
+        0.3125 * Math.cos(2 * t) -
+        0.125 * Math.cos(3 * t) -
         0.0625 * Math.cos(4 * t)
       );
       return { x, y };
@@ -71,10 +89,11 @@
         }
 
         const angle = (Math.PI * 2) * (step / steps);
+        const scaleBase = canvas.width * 0.375;
 
         for (let r = 0; r < 1; r += 0.02) {
-          const inner = heartEquation(angle, 50 * r);
-          const outer = heartEquation(angle, 150 * r);
+          const inner = heartEquation(angle, scaleBase * 0.333 * r);
+          const outer = heartEquation(angle, scaleBase * r);
           ctx.beginPath();
           ctx.moveTo(inner.x, inner.y);
           ctx.lineTo(outer.x, outer.y);
@@ -88,28 +107,30 @@
       drawLineStep();
     }
 
-   function animarTextoFATI() {
+    function animarTextoFATI() {
       let hue = 0;
 
       function dibujarTexto() {
         ctx.save();
 
-        // Texto transparente de fondo
-        ctx.font = "bold 30px Arial";
+        ctx.font = `bold ${canvas.width * 0.1}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        const grad = ctx.createLinearGradient(150, 220, 250, 240);
+        const grad = ctx.createLinearGradient(
+          canvas.width * 0.35,
+          canvas.height * 0.55,
+          canvas.width * 0.65,
+          canvas.height * 0.6
+        );
         grad.addColorStop(0, `hsl(${hue}, 100%, 75%)`);
         grad.addColorStop(1, `hsl(${(hue + 60) % 360}, 100%, 75%)`);
 
-       
         ctx.shadowColor = `hsl(${(hue + 180) % 360}, 100%, 60%)`;
-        ctx.shadowOffsetY = 0; 
-        ctx.shadowOffsetX = 0; 
+        ctx.shadowBlur = 10;
 
         ctx.fillStyle = grad;
-        ctx.fillText("FATI", 200, 230);
+        ctx.fillText("FATI", canvas.width / 2, canvas.height * 0.575);
 
         ctx.restore();
         hue = (hue + 2) % 360;
@@ -118,7 +139,6 @@
 
       dibujarTexto();
     }
-
   </script>
 </body>
 </html>
